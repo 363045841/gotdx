@@ -1,5 +1,10 @@
 package gotdx
 
+import (
+	"path/filepath"
+	"runtime"
+)
+
 const (
 	_defaultTCPAddress      = "119.147.212.81:7709"
 	_defaultExTCPAddress    = "112.74.214.43:7727"
@@ -21,6 +26,7 @@ type Options struct {
 	AutoSelectFastest   bool     // 连接前先对地址池做 TCP 测速并优先尝试低延迟节点
 	MaxRetryTimes       int      // 重试次数
 	TimeoutSec          int      // 连接和读写超时时间，单位秒
+	FuturesCalendarPath string   // 期货交易日历 SQLite 路径；为空时不转换 MAC 期货自然时间
 }
 
 func defaultOptions() *Options {
@@ -40,7 +46,17 @@ func defaultOptions() *Options {
 		MacExTCPAddressPool: macExPool,
 		MaxRetryTimes:       _defaultRetryTimes,
 		TimeoutSec:          _defaultTimeoutSec,
+		FuturesCalendarPath: defaultFuturesCalendarPath(),
 	}
+}
+
+// defaultFuturesCalendarPath 返回随 gotdx 源码发布的默认期货交易日历路径。
+func defaultFuturesCalendarPath() string {
+	_, sourceFile, _, ok := runtime.Caller(0)
+	if !ok {
+		return filepath.Join("data", "futures-trade-calendar.db")
+	}
+	return filepath.Join(filepath.Dir(sourceFile), "data", "futures-trade-calendar.db")
 }
 
 func applyOptions(opts ...Option) *Options {
@@ -106,6 +122,13 @@ func WithTimeoutSec(timeoutSec int) Option {
 		if timeoutSec > 0 {
 			o.TimeoutSec = timeoutSec
 		}
+	}
+}
+
+// WithFuturesCalendarPath 设置 MAC 期货 K 线自然时间转换使用的 SQLite 交易日历路径。
+func WithFuturesCalendarPath(path string) Option {
+	return func(o *Options) {
+		o.FuturesCalendarPath = path
 	}
 }
 

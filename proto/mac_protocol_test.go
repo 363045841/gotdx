@@ -1652,9 +1652,10 @@ func TestMACSymbolBarsBuildRequestAndParseResponse(t *testing.T) {
 	}
 }
 
+// TestCombineMACDateTimeOvernight 验证协议层保留 MAC 原始交易日与时刻，不擅自推断自然日。
 func TestCombineMACDateTimeOvernight(t *testing.T) {
-	got := combineMACDateTime(20260331, 60, true).Format("2006-01-02 15:04:05")
-	if got != "2026-04-01 00:01:00" {
+	got := combineMACDateTime(20260331, 60).Format("2006-01-02 15:04:05")
+	if got != "2026-03-31 00:01:00" {
 		t.Fatalf("unexpected datetime: %s", got)
 	}
 }
