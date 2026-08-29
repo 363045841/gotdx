@@ -1,6 +1,8 @@
 package gotdx
 
 import (
+	"strings"
+
 	"github.com/bensema/gotdx/proto"
 	"github.com/bensema/gotdx/types"
 )
@@ -8,19 +10,19 @@ import (
 // GetExServerInfo 获取扩展市场服务信息
 func (client *Client) GetExServerInfo() (*proto.ExServerInfoReply, error) {
 	obj := proto.NewExServerInfo()
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetCount 获取扩展市场标的数量
 func (client *Client) ExGetCount() (*proto.ExGetCountReply, error) {
 	obj := proto.NewExGetCount()
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetCategoryList 获取扩展市场分类列表
 func (client *Client) ExGetCategoryList() (*proto.ExGetCategoryListReply, error) {
 	obj := proto.NewExGetCategoryList()
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetList 获取扩展市场标的列表
@@ -29,13 +31,13 @@ func (client *Client) ExGetList(start uint32, count uint16) (*proto.ExGetListRep
 		count = types.DefaultExListCount
 	}
 	obj := proto.NewExGetList(&proto.ExGetListRequest{Start: start, Count: count})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetListExtra 获取扩展市场试验列表
 func (client *Client) ExGetListExtra(a uint16, b uint16, count uint16) (*proto.ExGetListExtraReply, error) {
 	obj := proto.NewExGetListExtra(&proto.ExGetListExtraRequest{A: a, B: b, Count: count})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetQuotesList 获取扩展市场行情列表
@@ -50,13 +52,13 @@ func (client *Client) ExGetQuotesList(category uint8, start uint16, count uint16
 		Count:       count,
 		SortReverse: quotesSortReverse(sortType, reverse),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetQuote 获取单个扩展市场行情
 func (client *Client) ExGetQuote(category uint8, code string) (*proto.ExGetQuoteReply, error) {
 	obj := proto.NewExGetQuote(&proto.ExGetQuoteRequest{Category: category, Code: makeCode9(code)})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetQuotes 获取批量扩展市场行情
@@ -67,7 +69,7 @@ func (client *Client) ExGetQuotes(categories []uint8, codes []string) (*proto.Ex
 	}
 
 	obj := proto.NewExGetQuotes(&proto.ExGetQuotesRequest{Stocks: stocks})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetQuotes2 获取批量扩展市场行情，兼容 pytdx2 的第二种批量接口
@@ -78,7 +80,7 @@ func (client *Client) ExGetQuotes2(categories []uint8, codes []string) (*proto.E
 	}
 
 	obj := proto.NewExGetQuotes2(&proto.ExGetQuotesRequest{Stocks: stocks})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetKLine 获取扩展市场K线
@@ -91,13 +93,13 @@ func (client *Client) ExGetKLine(category uint8, code string, period uint16, sta
 		Start:    start,
 		Count:    count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetExperiment2487 获取扩展市场试验报价 0x2487
 func (client *Client) ExGetExperiment2487(category uint8, code string) (*proto.ExExperiment2487Reply, error) {
 	obj := proto.NewExExperiment2487(&proto.ExExperiment2487Request{Category: category, Code: makeCode23(code)})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetExperiment2488 获取扩展市场试验报价 0x2488
@@ -107,7 +109,7 @@ func (client *Client) ExGetExperiment2488(category uint8, code string, mode uint
 		Code:     makeCode23(code),
 		Mode:     mode,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetKLine2 获取扩展市场 K 线协议 0x2489
@@ -120,7 +122,7 @@ func (client *Client) ExGetKLine2(category uint8, code string, period uint16, st
 		Start:    start,
 		Count:    count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetHistoryTransaction 获取扩展市场历史成交
@@ -130,7 +132,7 @@ func (client *Client) ExGetHistoryTransaction(date uint32, category uint8, code 
 		Category: category,
 		Code:     makeFixed43(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetTickChart 获取扩展市场当日分时图
@@ -139,7 +141,7 @@ func (client *Client) ExGetTickChart(category uint8, code string) (*proto.ExGetT
 		Category: category,
 		Code:     makeCode23(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetHistoryTickChart 获取扩展市场历史分时图
@@ -149,7 +151,7 @@ func (client *Client) ExGetHistoryTickChart(date uint32, category uint8, code st
 		Category: category,
 		Code:     makeCode23(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetChartSampling 获取扩展市场抽样图
@@ -158,7 +160,7 @@ func (client *Client) ExGetChartSampling(category uint8, code string) (*proto.Ex
 		Category: uint16(category),
 		Code:     makeCode22(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetBoardList 获取扩展市场板块榜单
@@ -168,19 +170,19 @@ func (client *Client) ExGetBoardList(boardType uint16, start uint16, pageSize ui
 		BoardType: boardType,
 		Start:     start,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetMapping2562 获取扩展市场映射信息
 func (client *Client) ExGetMapping2562(market uint16, start uint32, count uint32) (*proto.ExMapping2562Reply, error) {
 	obj := proto.NewExMapping2562(&proto.ExMapping2562Request{Market: market, Start: start, Count: count})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExGetFileMeta 获取扩展市场文件元信息
 func (client *Client) ExGetFileMeta(filename string) (*proto.GetFileMetaReply, error) {
 	obj := proto.NewExGetFileMeta(&proto.GetFileMetaRequest{Filename: makeFixed40(filename)})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExDownloadFile 下载扩展市场文件片段
@@ -190,7 +192,7 @@ func (client *Client) ExDownloadFile(filename string, start uint32, size uint32)
 		Size:     size,
 		Filename: makeFixed40(filename),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // ExDownloadFullFile 下载完整扩展市场文件
@@ -233,7 +235,7 @@ func (client *Client) ExGetTableDetail() (string, error) {
 
 func (client *Client) getExTable(detail bool) (string, error) {
 	start := uint32(0)
-	content := ""
+	var content strings.Builder
 
 	for {
 		var (
@@ -242,20 +244,20 @@ func (client *Client) getExTable(detail bool) (string, error) {
 		)
 		if detail {
 			obj := proto.NewExGetTableDetail(start)
-			reply, err = executeProtocol(client, obj.ExGetTableChunk)
+			reply, err = client.execute(obj.ExGetTableChunk)
 		} else {
 			obj := proto.NewExGetTable(start)
-			reply, err = executeProtocol(client, obj.ExGetTableChunk)
+			reply, err = client.execute(obj.ExGetTableChunk)
 		}
 		if err != nil {
 			return "", err
 		}
-		content += reply.Content
+		content.WriteString(reply.Content)
 		if reply.Count == 0 {
 			break
 		}
 		start += reply.Count
 	}
 
-	return content, nil
+	return content.String(), nil
 }

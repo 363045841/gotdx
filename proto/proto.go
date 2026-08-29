@@ -131,7 +131,7 @@ type Protocol[T any] interface {
 	Response() T
 }
 
-var _seqId uint32
+var seqIDCounter atomic.Uint32
 
 /*
 0c 02000000 00 1c00 1c00 2d05 0100363030303030080001000000140000000000000000000000
@@ -166,8 +166,7 @@ type RespHeader struct {
 }
 
 func seqID() uint32 {
-	atomic.AddUint32(&_seqId, 1)
-	return _seqId
+	return seqIDCounter.Add(1)
 }
 
 func buildGenericRequest(head uint8, customize uint32, packetType uint8, method uint16, payload []byte) ([]byte, error) {

@@ -1,10 +1,11 @@
 module github.com/bensema/gotdx
 
-go 1.26.0
+go 1.27.0
 
 require (
 	github.com/spf13/cast v1.10.0
 	golang.org/x/text v0.40.0
+	modernc.org/sqlite v1.54.0
 )
 
 require (
@@ -17,5 +18,4 @@ require (
 	modernc.org/libc v1.74.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.54.0 // indirect
 )

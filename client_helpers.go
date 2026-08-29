@@ -9,14 +9,14 @@ import (
 
 var ErrMarketCodeCount = errors.New("market code count error")
 
-func executeProtocol[T any](client *Client, protocol proto.Protocol[T]) (T, error) {
+func (client *Client) execute[T any](protocol proto.Protocol[T]) (T, error) {
 	client.mu.Lock()
 	defer client.mu.Unlock()
 
-	return executeProtocolLocked(client, protocol)
+	return client.executeLocked(protocol)
 }
 
-func executeProtocolLocked[T any](client *Client, protocol proto.Protocol[T]) (T, error) {
+func (client *Client) executeLocked[T any](protocol proto.Protocol[T]) (T, error) {
 	var zero T
 
 	header, payload, err := client.exchange(protocol)

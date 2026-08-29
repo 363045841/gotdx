@@ -8,7 +8,7 @@ func (client *Client) GetCompanyCategories(market uint8, code string) (*proto.Ge
 		Market: uint16(market),
 		Code:   makeCode6(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetCompanyContent 获取公司信息内容
@@ -20,7 +20,7 @@ func (client *Client) GetCompanyContent(market uint8, code string, filename stri
 		Start:    start,
 		Length:   length,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetFinanceInfo 获取财务信息
@@ -29,7 +29,7 @@ func (client *Client) GetFinanceInfo(market uint8, code string) (*proto.GetFinan
 		Market: market,
 		Code:   makeCode6(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetXDXRInfo 获取除权除息信息
@@ -38,13 +38,13 @@ func (client *Client) GetXDXRInfo(market uint8, code string) (*proto.GetXDXRInfo
 		Market: market,
 		Code:   makeCode6(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetFileMeta 获取文件元信息
 func (client *Client) GetFileMeta(filename string) (*proto.GetFileMetaReply, error) {
 	obj := proto.NewGetFileMeta(&proto.GetFileMetaRequest{Filename: makeFixed40(filename)})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // DownloadFile 下载文件片段
@@ -54,5 +54,5 @@ func (client *Client) DownloadFile(filename string, start uint32, size uint32) (
 		Size:     size,
 		Filename: makeFixed300(filename),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }

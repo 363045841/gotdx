@@ -4,9 +4,40 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"sync"
 	"testing"
 	"time"
 )
+
+func TestSeqIDConcurrent(t *testing.T) {
+	const (
+		workers   = 16
+		perWorker = 128
+	)
+
+	ids := make(chan uint32, workers*perWorker)
+	var wg sync.WaitGroup
+	for range workers {
+		wg.Go(func() {
+			for range perWorker {
+				ids <- seqID()
+			}
+		})
+	}
+	wg.Wait()
+	close(ids)
+
+	seen := make(map[uint32]struct{}, workers*perWorker)
+	for id := range ids {
+		if _, exists := seen[id]; exists {
+			t.Fatalf("duplicate sequence ID: %d", id)
+		}
+		seen[id] = struct{}{}
+	}
+	if len(seen) != workers*perWorker {
+		t.Fatalf("unexpected sequence ID count: %d", len(seen))
+	}
+}
 
 func encodePrice(value int) []byte {
 	sign := value < 0

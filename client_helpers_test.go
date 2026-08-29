@@ -1,10 +1,69 @@
 package gotdx
 
 import (
+	"errors"
+	"io"
+	"net"
 	"testing"
 
+	"github.com/bensema/gotdx/proto"
 	"github.com/bensema/gotdx/types"
 )
+
+type executeGenericMethodProtocol struct {
+	reply string
+}
+
+func (*executeGenericMethodProtocol) BuildRequest() ([]byte, error) {
+	return []byte{0x5a}, nil
+}
+
+func (p *executeGenericMethodProtocol) ParseResponse(_ *proto.RespHeader, payload []byte) error {
+	p.reply = string(payload)
+	return nil
+}
+
+func (p *executeGenericMethodProtocol) Response() string {
+	return p.reply
+}
+
+func TestClientExecuteGenericMethod(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	t.Cleanup(func() {
+		_ = clientConn.Close()
+		_ = serverConn.Close()
+	})
+
+	client := New(WithTimeoutSec(1))
+	client.conn = clientConn
+
+	serverDone := make(chan error, 1)
+	go func() {
+		request := make([]byte, 1)
+		if _, err := io.ReadFull(serverConn, request); err != nil {
+			serverDone <- err
+			return
+		}
+		if request[0] != 0x5a {
+			serverDone <- errors.New("unexpected request payload")
+			return
+		}
+
+		_, err := serverConn.Write(append(fakeRespHeader(0, 0, 5), []byte("reply")...))
+		serverDone <- err
+	}()
+
+	reply, err := client.execute(&executeGenericMethodProtocol{})
+	if err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if reply != "reply" {
+		t.Fatalf("unexpected reply: %q", reply)
+	}
+	if err := <-serverDone; err != nil {
+		t.Fatalf("server failed: %v", err)
+	}
+}
 
 func TestMakeStocks(t *testing.T) {
 	stocks, err := makeStocks([]uint8{types.MarketSZ.Uint8(), types.MarketSH.Uint8()}, []string{"000001", "600000"})

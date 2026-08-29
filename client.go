@@ -333,7 +333,7 @@ func (client *Client) Connect() (*proto.Hello1Reply, error) {
 	var reply *proto.Hello1Reply
 	err := client.connectWithHandshake(func() error {
 		var err error
-		reply, err = executeProtocolLocked(client, obj)
+		reply, err = client.executeLocked(obj)
 		return err
 	})
 	if err != nil {
@@ -360,7 +360,7 @@ func (client *Client) ConnectEx() (*proto.ExLoginReply, error) {
 	var reply *proto.ExLoginReply
 	err := client.connectWithHandshake(func() error {
 		var err error
-		reply, err = executeProtocolLocked(client, obj)
+		reply, err = client.executeLocked(obj)
 		return err
 	})
 	if err != nil {

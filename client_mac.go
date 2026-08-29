@@ -39,7 +39,7 @@ func (client *Client) ConnectMAC() error {
 
 func (client *Client) GetMACBoardCount(boardType uint16) (*proto.MACBoardCountReply, error) {
 	obj := proto.NewMACBoardCount(&proto.MACBoardListRequest{BoardType: boardType})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) GetMACBoardList(boardType uint16, start uint16, pageSize uint16) (*proto.MACBoardListReply, error) {
@@ -48,7 +48,7 @@ func (client *Client) GetMACBoardList(boardType uint16, start uint16, pageSize u
 		Start:     start,
 		PageSize:  pageSize,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) GetMACBoardMembers(boardSymbol string, sortType uint16, start uint32, pageSize uint8, sortOrder uint16) (*proto.MACBoardMembersReply, error) {
@@ -63,7 +63,7 @@ func (client *Client) GetMACBoardMembers(boardSymbol string, sortType uint16, st
 		PageSize:  pageSize,
 		SortOrder: sortOrder,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) GetMACBoardMembersQuotes(boardSymbol string, sortType uint16, start uint32, pageSize uint8, sortOrder uint8) (*proto.MACBoardMembersQuotesReply, error) {
@@ -78,7 +78,7 @@ func (client *Client) GetMACBoardMembersQuotes(boardSymbol string, sortType uint
 		PageSize:  pageSize,
 		SortOrder: sortOrder,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACBoardMembersQuotesDynamic 获取按位图动态解析的 MAC 板块成分报价。
@@ -101,7 +101,7 @@ func (client *Client) GetMACBoardMembersQuotesDynamicWithFilter(boardSymbol stri
 		Filter:      filter,
 		FieldBitmap: fieldBitmap,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACQuotes 获取 MAC 单只标的快照与分时采样。
@@ -125,7 +125,7 @@ func (client *Client) GetMACSymbolQuotes(markets []uint8, codes []string, fieldB
 		FieldBitmap: fieldBitmap,
 		Stocks:      stocks,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACQuotesWithDate 获取 MAC 单只标的快照与分时采样，并可指定查询日期。
@@ -139,7 +139,7 @@ func (client *Client) GetMACQuotesWithDate(market uint8, code string, queryDate 
 		req.Zero2 = uint16(queryDate >> 16)
 	}
 	obj := proto.NewMACQuotes(req)
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACTransactions 获取 MAC 分时成交。
@@ -153,7 +153,7 @@ func (client *Client) GetMACFileList(filename string, offset uint32) (*proto.MAC
 		Offset:   offset,
 		Filename: makeMACFilename70(filename),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACFileDownload 下载 MAC 文件片段。
@@ -164,7 +164,7 @@ func (client *Client) GetMACFileDownload(filename string, index uint32, offset u
 		Size:     size,
 		Filename: makeMACFilename70(filename),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACCapitalFlow 获取 MAC 资金流向。
@@ -173,13 +173,13 @@ func (client *Client) GetMACCapitalFlow(market uint8, code string) (*proto.MACCa
 		Market: uint16(market),
 		Symbol: makeMACCode8Client(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACServerInfo 获取 MAC 服务端交易日时段与状态信息。
 func (client *Client) GetMACServerInfo() (*proto.MACServerInfoReply, error) {
 	obj := proto.NewMACServerInfo(nil)
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACKLineOffset 获取 MAC K线偏移信息。
@@ -188,7 +188,7 @@ func (client *Client) GetMACKLineOffset(offset uint32, count uint32) (*proto.MAC
 		Offset: offset,
 		Count:  count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACTransactionsWithDate 获取 MAC 分时成交，并可指定查询日期。
@@ -200,7 +200,7 @@ func (client *Client) GetMACTransactionsWithDate(market uint8, code string, star
 		Start:     start,
 		Count:     count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACAuction 获取 MAC 竞价数据。
@@ -211,7 +211,7 @@ func (client *Client) GetMACAuction(market uint8, code string, start uint32, cou
 		Start:  start,
 		Count:  count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACTickCharts 获取 MAC 多日分时。
@@ -222,7 +222,7 @@ func (client *Client) GetMACTickCharts(market uint8, code string, queryDate uint
 		QueryDate: queryDate,
 		Days:      days,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACSymbolInfo 获取 MAC 股票摘要。
@@ -231,7 +231,7 @@ func (client *Client) GetMACSymbolInfo(market uint8, code string) (*proto.MACSym
 		Market: uint16(market),
 		Code:   makeMACCode22Client(code),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 // GetMACMarketMonitor 获取 MAC 市场监控数据。
@@ -241,7 +241,7 @@ func (client *Client) GetMACMarketMonitor(market uint8, start uint16, count uint
 		Start:  start,
 		Count:  count,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) GetMACSymbolBelongBoard(market uint8, symbol string) (*proto.MACSymbolBelongBoardReply, error) {
@@ -249,7 +249,7 @@ func (client *Client) GetMACSymbolBelongBoard(market uint8, symbol string) (*pro
 		Market: uint16(market),
 		Symbol: makeMACCode8Client(symbol),
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) GetMACSymbolBars(market uint8, code string, period uint16, times uint16, start uint32, count uint16, adjust uint16) (*proto.MACSymbolBarsReply, error) {
@@ -262,7 +262,7 @@ func (client *Client) GetMACSymbolBars(market uint8, code string, period uint16,
 		Count:  count,
 		Adjust: adjust,
 	})
-	return executeProtocol(client, obj)
+	return client.execute(obj)
 }
 
 func (client *Client) MACBoardCount(boardType uint16) (uint16, error) {

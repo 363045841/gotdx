@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white" alt="Go 1.26+">
+  <img src="https://img.shields.io/badge/Go-1.27%2B-00ADD8?logo=go&logoColor=white" alt="Go 1.27+">
   <img src="https://img.shields.io/badge/Markets-Main%20%2F%20Extended-123B67" alt="Markets">
   <img src="https://img.shields.io/badge/MAC-Supported-0F766E" alt="MAC">
   <img src="https://img.shields.io/badge/WebViewer-Built--in-C86B36" alt="Web Viewer">
