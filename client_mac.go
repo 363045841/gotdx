@@ -693,6 +693,9 @@ func (client *Client) MACSymbolBars(market uint8, code string, period uint16, ti
 		remaining -= uint32(pageSize)
 	}
 	applyMACSymbolBarTurnover(result)
+	if err := resolveMACFuturesDateTimes(result, code, client.opt.FuturesCalendarPath); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 

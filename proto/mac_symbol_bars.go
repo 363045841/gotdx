@@ -60,6 +60,8 @@ type MACSymbolBarsReply struct {
 
 type MACSymbolBar struct {
 	DateTime    time.Time
+	RawYMD      uint32 // 原始响应中的交易日字段，未经时间修正。
+	RawSeconds  uint32 // 原始响应中的当日秒数字段，未经时间修正。
 	Open        float64
 	High        float64
 	Low         float64
@@ -133,7 +135,6 @@ func (obj *MACSymbolBars) ParseResponse(header *RespHeader, data []byte) error {
 	obj.reply.Count = binary.LittleEndian.Uint16(data[27:29])
 	obj.reply.Start = binary.LittleEndian.Uint32(data[29:33])
 
-	formatTDXTime := obj.reply.Period < 4 || obj.reply.Period == 7 || obj.reply.Period == 8
 	pos := 33
 	var preCloseRaw float64 // 昨收盘价
 	for i := uint16(0); i < obj.reply.Count; i++ {
@@ -143,7 +144,9 @@ func (obj *MACSymbolBars) ParseResponse(header *RespHeader, data []byte) error {
 		ymd := binary.LittleEndian.Uint32(data[pos : pos+4])
 		seconds := binary.LittleEndian.Uint32(data[pos+4 : pos+8])
 		item := MACSymbolBar{
-			DateTime:    combineMACDateTime(ymd, seconds, formatTDXTime),
+			DateTime:    combineMACDateTime(ymd, seconds),
+			RawYMD:      ymd,
+			RawSeconds:  seconds,
 			Open:        float64(math.Float32frombits(binary.LittleEndian.Uint32(data[pos+8 : pos+12]))),
 			High:        float64(math.Float32frombits(binary.LittleEndian.Uint32(data[pos+12 : pos+16]))),
 			Low:         float64(math.Float32frombits(binary.LittleEndian.Uint32(data[pos+16 : pos+20]))),
@@ -212,16 +215,13 @@ func (obj *MACSymbolBars) Response() *MACSymbolBarsReply {
 	return obj.reply
 }
 
-func combineMACDateTime(ymd uint32, seconds uint32, formatTDXTime bool) time.Time {
+// combineMACDateTime 组合 MAC 原始交易日和秒数，不推断自然日期。
+func combineMACDateTime(ymd uint32, seconds uint32) time.Time {
 	year := int(ymd / 10000)
 	month := int((ymd % 10000) / 100)
 	day := int(ymd % 100)
 	hours := int(seconds / 3600)
 	minutes := int((seconds % 3600) / 60)
 
-	ts := time.Date(year, time.Month(month), day, hours, minutes, 0, 0, time.Local)
-	if formatTDXTime && ts.Hour() <= 5 {
-		return ts.Add(24 * time.Hour)
-	}
-	return ts
+	return time.Date(year, time.Month(month), day, hours, minutes, 0, 0, time.Local)
 }
